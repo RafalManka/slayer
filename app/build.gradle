@@ -1,0 +1,33 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        applicationId "com.layer.messenger"
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 33
+        versionName "1.0.0"
+    }
+    buildTypes {
+        debug {
+            buildConfigField "String", "LAYER_APP_ID", "\"layer:///apps/staging/f75e9168-54b9-11e6-b15e-a79fff1b221c\""
+            buildConfigField "String", "GCM_SENDER_ID", "\"748607264448\""
+        }
+        release {
+            buildConfigField "String", "LAYER_APP_ID", "\"layer:///apps/staging/f75e9168-54b9-11e6-b15e-a79fff1b221c\""
+            buildConfigField "String", "GCM_SENDER_ID", "\"748607264448\""
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    // All flavors
+    compile 'com.layer.atlas:layer-atlas:0.2.13'
+    // Flavor-specific dependencies
+    compile 'com.google.android.gms:play-services-vision:8.4.0'
+}
