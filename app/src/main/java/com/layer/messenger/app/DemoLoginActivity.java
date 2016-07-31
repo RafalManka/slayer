@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.layer.messenger.R;
 import com.layer.messenger.layer.conversations.ConversationsListActivity;
 import com.layer.messenger.layer.providers.auth.AuthenticationProvider;
+import com.layer.messenger.layer.providers.auth.Credentials;
 import com.layer.messenger.layer.providers.auth.DemoAuthenticationProvider;
 import com.layer.messenger.layer.providers.client.LayerClientProvider;
 import com.layer.messenger.util.Log;
@@ -62,7 +63,7 @@ public class DemoLoginActivity extends AppCompatActivity {
         progressDialog.setMessage(getResources().getString(R.string.login_dialog_message));
         progressDialog.show();
         LayerClientProvider.authenticate(
-                new DemoAuthenticationProvider.Credentials(name),
+                new Credentials(name),
                 new AuthenticationProvider.Callback() {
                     @Override
                     public void onSuccess(AuthenticationProvider provider, String userId) {

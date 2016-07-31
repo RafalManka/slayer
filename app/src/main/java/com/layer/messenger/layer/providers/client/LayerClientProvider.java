@@ -3,6 +3,7 @@ package com.layer.messenger.layer.providers.client;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.layer.atlas.messagetypes.text.TextCellFactory;
 import com.layer.atlas.messagetypes.threepartimage.ThreePartImageUtils;
@@ -108,7 +109,7 @@ public class LayerClientProvider {
      *
      * @param callback Callback to receive deauthentication success and failure.
      */
-    public static void deauthenticate(final LayerDeauthenticationCallbacks callback) throws Exception {
+    public static void deauthenticate(@Nullable final LayerDeauthenticationCallbacks callback) throws Exception {
         LayerClient instance = getInstance();
         Util.deauthenticate(instance, new Util.DeauthenticationCallback() {
             @Override
@@ -116,9 +117,13 @@ public class LayerClientProvider {
             public void onDeauthenticationSuccess(LayerClient client) {
                 try {
                     getAuthenticationProvider().setCredentials(null);
-                    callback.onDeauthenticationSuccess(client);
+                    if (callback != null) {
+                        callback.onDeauthenticationSuccess(client);
+                    }
                 } catch (Exception e) {
-                    callback.onError("Deauthentication not possible. Layer could not be initialized.");
+                    if (callback != null) {
+                        callback.onError("Deauthentication not possible. Layer could not be initialized.");
+                    }
                 }
             }
 
@@ -137,7 +142,7 @@ public class LayerClientProvider {
     }
 
     public static ParticipantProvider generateParticipantProvider(Context context) {
-        return new UserDao(context).setLayerAppId();
+        return new UserDao(context).setup();
     }
 
     //==============================================================================================

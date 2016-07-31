@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings("unused")
-public class UserDao implements ParticipantProvider {
+public class UserDao implements ParticipantProvider, ParticipantsRequestCallback {
     private final Context mContext;
     private final Queue<ParticipantListener> mParticipantListeners = new ConcurrentLinkedQueue<>();
     private final Map<String, User> mParticipantMap = new HashMap<>();
@@ -36,7 +36,7 @@ public class UserDao implements ParticipantProvider {
         mContext = context.getApplicationContext();
     }
 
-    public UserDao setLayerAppId() {
+    public UserDao setup() {
         load();
         fetchParticipants();
         return this;
@@ -160,28 +160,24 @@ public class UserDao implements ParticipantProvider {
         if (!mFetching.compareAndSet(false, true)) {
             return this;
         }
-        UserRequestHandler.startRequestParticipants(
-                new ParticipantsRequestCallback() {
-
-                    @Override
-                    public void participants(List<User> users) {
-                        setParticipants(users);
-                        mFetching.set(false);
-                    }
-
-                    @Override
-                    public void error() {
-                        mFetching.set(false);
-                    }
-                }
-        );
+        UserRequestHandler.startRequestParticipants(this);
         return this;
+    }
+
+    @Override
+    public void participants(List<User> users) {
+        setParticipants(users);
+        mFetching.set(false);
+    }
+
+    @Override
+    public void error() {
+        mFetching.set(false);
     }
 
     //==============================================================================================
     // Utils
     //==============================================================================================
-
 
     public static JSONArray participantsToJson(Collection<User> participants) throws JSONException {
         JSONArray participantsArray = new JSONArray();

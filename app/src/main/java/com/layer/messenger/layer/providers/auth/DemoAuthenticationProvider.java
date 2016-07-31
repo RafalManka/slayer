@@ -16,7 +16,7 @@ import com.layer.sdk.exceptions.LayerException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAuthenticationProvider.Credentials>, OnAuthenticationFailedListener {
+public class DemoAuthenticationProvider implements AuthenticationProvider<Credentials>, OnAuthenticationFailedListener {
     private final SharedPreferences mPreferences;
     private Callback mCallback;
 
@@ -113,7 +113,7 @@ public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAu
 
     private void respondToChallenge(LayerClient layerClient, String nonce) {
         Credentials credentials = new Credentials(mPreferences.getString("name", null));
-        if (credentials.getUserName() == null || credentials.getLayerAppId() == null) {
+        if (credentials.getUserName() == null) {
             if (Log.isLoggable(Log.WARN)) {
                 Log.w("No stored credentials to respond to challenge with");
             }
@@ -131,20 +131,5 @@ public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAu
         }
     }
 
-    public static class Credentials {
-        private final String mUserName;
-
-        public Credentials(String userName) {
-            mUserName = userName;
-        }
-
-        public String getUserName() {
-            return mUserName;
-        }
-
-        public String getLayerAppId() {
-            return "com.layer.messenger.providerdemo";
-        }
-    }
 }
 
