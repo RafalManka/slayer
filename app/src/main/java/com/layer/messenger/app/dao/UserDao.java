@@ -1,21 +1,21 @@
-package com.layer.messenger.app.model;
+package com.layer.messenger.app.dao;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import com.layer.atlas.provider.Participant;
 import com.layer.atlas.provider.ParticipantProvider;
+import com.layer.messenger.BuildConfig;
+import com.layer.messenger.app.dao.api.ParticipantListener;
+import com.layer.messenger.app.dao.api.ParticipantsRequestCallback;
+import com.layer.messenger.app.dao.api.UserRequestHandler;
+import com.layer.messenger.app.model.User;
 import com.layer.messenger.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,11 +25,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.layer.messenger.util.Util.streamToString;
-
+@SuppressWarnings("unused")
 public class UserDao implements ParticipantProvider {
     private final Context mContext;
-    private String mLayerAppIdLastPathSegment;
     private final Queue<ParticipantListener> mParticipantListeners = new ConcurrentLinkedQueue<>();
     private final Map<String, User> mParticipantMap = new HashMap<>();
     private final AtomicBoolean mFetching = new AtomicBoolean(false);
@@ -38,17 +36,11 @@ public class UserDao implements ParticipantProvider {
         mContext = context.getApplicationContext();
     }
 
-    public UserDao setLayerAppId(String layerAppId) {
-        if (layerAppId.contains("/")) {
-            mLayerAppIdLastPathSegment = Uri.parse(layerAppId).getLastPathSegment();
-        } else {
-            mLayerAppIdLastPathSegment = layerAppId;
-        }
+    public UserDao setLayerAppId() {
         load();
         fetchParticipants();
         return this;
     }
-
 
     //==============================================================================================
     // Atlas ParticipantProvider
@@ -57,7 +49,7 @@ public class UserDao implements ParticipantProvider {
     @Override
     public Map<String, Participant> getMatchingParticipants(String filter, Map<String, Participant> result) {
         if (result == null) {
-            result = new HashMap<String, Participant>();
+            result = new HashMap<>();
         }
 
         synchronized (mParticipantMap) {
@@ -125,7 +117,7 @@ public class UserDao implements ParticipantProvider {
             if (jsonString == null) return false;
 
             try {
-                for (User participant : participantsFromJson(new JSONArray(jsonString))) {
+                for (User participant : UserUtils.participantsFromJson(new JSONArray(jsonString))) {
                     mParticipantMap.put(participant.getId(), participant);
                 }
                 return true;
@@ -153,71 +145,45 @@ public class UserDao implements ParticipantProvider {
         return false;
     }
 
+    private String getProjectId() {
+        if (BuildConfig.LAYER_APP_ID.contains("/")) {
+            return Uri.parse(BuildConfig.LAYER_APP_ID).getLastPathSegment();
+        } else {
+            return BuildConfig.LAYER_APP_ID;
+        }
+    }
 
     //==============================================================================================
     // Network operations
     //==============================================================================================
     private UserDao fetchParticipants() {
-        if (!mFetching.compareAndSet(false, true)) return this;
-        new AsyncTask<Void, Void, Void>() {
-            protected Void doInBackground(Void... params) {
-                try {
-                    // Post request
-                    String url = "https://layer-identity-provider.herokuapp.com/apps/" + mLayerAppIdLastPathSegment + "/atlas_identities";
-                    HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-                    connection.setDoInput(true);
-                    connection.setDoOutput(false);
-                    connection.setRequestMethod("GET");
-                    connection.addRequestProperty("Content-Type", "application/json");
-                    connection.addRequestProperty("Accept", "application/json");
-                    connection.addRequestProperty("X_LAYER_APP_ID", mLayerAppIdLastPathSegment);
+        if (!mFetching.compareAndSet(false, true)) {
+            return this;
+        }
+        UserRequestHandler.startRequestParticipants(
+                new ParticipantsRequestCallback() {
 
-                    // Handle failure
-                    int statusCode = connection.getResponseCode();
-                    if (statusCode != HttpURLConnection.HTTP_OK && statusCode != HttpURLConnection.HTTP_CREATED) {
-                        if (Log.isLoggable(Log.ERROR)) {
-                            Log.e(String.format("Got status %d when fetching participants", statusCode));
-                        }
-                        return null;
+                    @Override
+                    public void participants(List<User> users) {
+                        setParticipants(users);
+                        mFetching.set(false);
                     }
 
-                    // Parse response
-                    InputStream in = new BufferedInputStream(connection.getInputStream());
-                    String result = streamToString(in);
-                    in.close();
-                    connection.disconnect();
-                    JSONArray json = new JSONArray(result);
-                    setParticipants(participantsFromJson(json));
-                } catch (Exception e) {
-                    if (Log.isLoggable(Log.ERROR)) Log.e(e.getMessage(), e);
-                } finally {
-                    mFetching.set(false);
+                    @Override
+                    public void error() {
+                        mFetching.set(false);
+                    }
                 }
-                return null;
-            }
-        }.execute();
+        );
         return this;
     }
-
 
     //==============================================================================================
     // Utils
     //==============================================================================================
 
-    private static List<User> participantsFromJson(JSONArray participantArray) throws JSONException {
-        List<User> participants = new ArrayList<>(participantArray.length());
-        for (int i = 0; i < participantArray.length(); i++) {
-            JSONObject participantObject = participantArray.getJSONObject(i);
-            User participant = new User();
-            participant.setId(participantObject.optString("id"));
-            participant.setName(participantObject.optString("name"));
-            participant.setAvatarUrl(null);
-            participants.add(participant);
-        }
-        return participants;
-    }
 
-    private static JSONArray participantsToJson(Collection<User> participants) throws JSONException {
+    public static JSONArray participantsToJson(Collection<User> participants) throws JSONException {
         JSONArray participantsArray = new JSONArray();
         for (User participant : participants) {
             JSONObject participantObject = new JSONObject();
@@ -247,11 +213,4 @@ public class UserDao implements ParticipantProvider {
     }
 
 
-    //==============================================================================================
-    // Callbacks
-    //==============================================================================================
-
-    public interface ParticipantListener {
-        void onParticipantsUpdated(UserDao provider, Collection<String> updatedParticipantIds);
-    }
 }

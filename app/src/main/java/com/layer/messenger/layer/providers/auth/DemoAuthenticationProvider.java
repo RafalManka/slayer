@@ -5,24 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.DemoLoginActivity;
 import com.layer.messenger.app.ResumeActivity;
+import com.layer.messenger.app.dao.api.OnAuthenticationFailedListener;
+import com.layer.messenger.app.dao.api.UserRequestHandler;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 import com.layer.sdk.exceptions.LayerException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import static com.layer.messenger.util.Util.streamToString;
-
-public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAuthenticationProvider.Credentials> {
+public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAuthenticationProvider.Credentials>, OnAuthenticationFailedListener {
     private final SharedPreferences mPreferences;
     private Callback mCallback;
 
@@ -36,10 +30,7 @@ public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAu
             mPreferences.edit().clear().apply();
             return this;
         }
-        mPreferences.edit()
-//                .putString("appId", credentials.getLayerAppId())
-                .putString("name", credentials.getUserName())
-                .apply();
+        mPreferences.edit().putString("name", credentials.getUserName()).apply();
         return this;
     }
 
@@ -84,15 +75,7 @@ public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAu
     }
 
     @Override
-    public boolean routeLogin(LayerClient layerClient, String layerAppId, Activity from) {
-        if (layerAppId == null) {
-            // No App ID: must scan from QR code.
-            /*if (Log.isLoggable(Log.VERBOSE)) Log.v("Routing to QR Code scanning Activity");
-            Intent intent = new Intent(from, DemoAtlasIdScannerActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            from.startActivity(intent);*/
-            return true;
-        }
+    public boolean routeLogin(LayerClient layerClient, Activity from) {
 
         if ((layerClient != null) && layerClient.isAuthenticated()) {
             // The LayerClient is authenticated: no action required.
@@ -121,8 +104,15 @@ public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAu
         return true;
     }
 
+    @Override
+    public void onError(String error) {
+        if (mCallback != null) {
+            mCallback.onError(DemoAuthenticationProvider.this, error);
+        }
+    }
+
     private void respondToChallenge(LayerClient layerClient, String nonce) {
-        Credentials credentials = new Credentials(/*mPreferences.getString("appId", null),*/ mPreferences.getString("name", null));
+        Credentials credentials = new Credentials(mPreferences.getString("name", null));
         if (credentials.getUserName() == null || credentials.getLayerAppId() == null) {
             if (Log.isLoggable(Log.WARN)) {
                 Log.w("No stored credentials to respond to challenge with");
@@ -131,72 +121,20 @@ public class DemoAuthenticationProvider implements AuthenticationProvider<DemoAu
         }
 
         try {
-            // Post request
-            String url = "https://layer-identity-provider.herokuapp.com/apps/" + getProjectId() + "/atlas_identities";
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setRequestProperty("X_LAYER_APP_ID", getProjectId());
-
-            // Credentials
-            JSONObject rootObject = new JSONObject()
+            JSONObject params = new JSONObject()
                     .put("nonce", nonce)
                     .put("name", credentials.getUserName());
 
-            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-
-            OutputStream os = connection.getOutputStream();
-            os.write(rootObject.toString().getBytes("UTF-8"));
-            os.close();
-
-            // Handle failure
-            int statusCode = connection.getResponseCode();
-            if (statusCode != HttpURLConnection.HTTP_OK && statusCode != HttpURLConnection.HTTP_CREATED) {
-                String error = "Got status " + statusCode + " when requesting authentication for '" + credentials.getUserName() + "' with nonce '" + nonce + "' from '" + url + "'";
-                if (Log.isLoggable(Log.ERROR)) Log.e(error);
-                if (mCallback != null) mCallback.onError(this, error);
-                return;
-            }
-
-            // Parse response
-            InputStream in = new BufferedInputStream(connection.getInputStream());
-            String result = streamToString(in);
-            in.close();
-            connection.disconnect();
-            JSONObject json = new JSONObject(result);
-            if (json.has("error")) {
-                String error = json.getString("error");
-                if (Log.isLoggable(Log.ERROR)) Log.e(error);
-                if (mCallback != null) mCallback.onError(this, error);
-                return;
-            }
-
-            // Answer authentication challenge.
-            String identityToken = json.optString("identity_token", null);
-            if (Log.isLoggable(Log.VERBOSE)) Log.v("Got identity token: " + identityToken);
-            layerClient.answerAuthenticationChallenge(identityToken);
-        } catch (Exception e) {
-            String error = "Error when authenticating with provider: " + e.getMessage();
-            if (Log.isLoggable(Log.ERROR)) Log.e(error, e);
-            if (mCallback != null) mCallback.onError(this, error);
+            UserRequestHandler.startRequestAuthenticate(layerClient, params, DemoAuthenticationProvider.this);
+        } catch (JSONException e) {
+            Log.e("Something went wrong While trying to authenticate in Layer.", e);
         }
     }
 
-    private String getProjectId() {
-//        "f75e9168-54b9-11e6-b15e-a79fff1b221c"
-        String[] arr = BuildConfig.LAYER_APP_ID.split("/");
-        return arr[arr.length - 1];
-    }
-
     public static class Credentials {
-        //        private final String mLayerAppId;
         private final String mUserName;
 
-        public Credentials(/*String layerAppId,*/ String userName) {
-//            mLayerAppId = layerAppId == null ? null : (layerAppId.contains("/") ? layerAppId.substring(layerAppId.lastIndexOf("/") + 1) : layerAppId);
+        public Credentials(String userName) {
             mUserName = userName;
         }
 

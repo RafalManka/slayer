@@ -44,11 +44,10 @@ public interface AuthenticationProvider<Tcredentials> extends LayerAuthenticatio
      * desired login Activity.
      *
      * @param layerClient
-     * @param layerAppId
      * @param from
      * @return
      */
-    boolean routeLogin(LayerClient layerClient, String layerAppId, Activity from);
+    boolean routeLogin(LayerClient layerClient, Activity from);
 
     /**
      * Callback for handling authentication success and failure.

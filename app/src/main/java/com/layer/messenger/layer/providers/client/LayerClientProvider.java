@@ -10,7 +10,7 @@ import com.layer.atlas.provider.ParticipantProvider;
 import com.layer.atlas.util.Util;
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.App;
-import com.layer.messenger.app.model.UserDao;
+import com.layer.messenger.app.dao.UserDao;
 import com.layer.messenger.layer.providers.auth.AuthenticationProvider;
 import com.layer.messenger.layer.providers.auth.DemoAuthenticationProvider;
 import com.layer.sdk.LayerClient;
@@ -129,11 +129,6 @@ public class LayerClientProvider {
         });
     }
 
-
-    public static String getLayerAppId() {
-        return BuildConfig.APPLICATION_ID;
-    }
-
     public static ParticipantProvider getParticipantProvider() throws Exception {
         if (sParticipantProvider == null) {
             sParticipantProvider = generateParticipantProvider(sContext);
@@ -142,7 +137,7 @@ public class LayerClientProvider {
     }
 
     public static ParticipantProvider generateParticipantProvider(Context context) {
-        return new UserDao(context).setLayerAppId(getLayerAppId());
+        return new UserDao(context).setLayerAppId();
     }
 
     //==============================================================================================
@@ -157,7 +152,7 @@ public class LayerClientProvider {
      * @return `true` if the user has been routed to another Activity, or `false` otherwise.
      */
     public static boolean routeLogin(Activity from) throws Exception {
-        return getAuthenticationProvider().routeLogin(getInstance(), getLayerAppId(), from);
+        return getAuthenticationProvider().routeLogin(getInstance(), from);
     }
 
     /**
@@ -170,8 +165,6 @@ public class LayerClientProvider {
     @SuppressWarnings("unchecked")
     public static void authenticate(Object credentials, AuthenticationProvider.Callback callback) throws Exception {
         LayerClient client = getInstance();
-        String layerAppId = getLayerAppId();
-        if (layerAppId == null) return;
         getAuthenticationProvider()
                 .setCredentials(credentials)
                 .setCallback(callback);
