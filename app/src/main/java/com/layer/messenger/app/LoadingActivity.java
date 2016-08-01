@@ -15,7 +15,7 @@ import com.layer.sdk.listeners.LayerAuthenticationListener;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ResumeActivity extends AppCompatActivity implements LayerAuthenticationListener {
+public class LoadingActivity extends AppCompatActivity implements LayerAuthenticationListener {
     public static final String EXTRA_LOGGED_IN_ACTIVITY_CLASS_NAME = "loggedInActivity";
     public static final String EXTRA_LOGGED_OUT_ACTIVITY_CLASS_NAME = "loggedOutActivity";
 

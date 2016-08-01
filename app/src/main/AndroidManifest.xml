@@ -41,7 +41,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".app.DemoLoginActivity"
+            android:name=".app.LoginActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
 
         <!-- Activity: List of Conversations -->
@@ -69,7 +69,7 @@
 
         <!-- Activity: Resume using provider credentials -->
         <activity
-            android:name=".app.ResumeActivity"
+            android:name=".app.LoadingActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Receiver: Our app notification handling -->

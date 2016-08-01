@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
@@ -31,8 +30,7 @@ import com.layer.atlas.typingindicators.BubbleTypingIndicatorFactory;
 import com.layer.atlas.util.Util;
 import com.layer.atlas.util.views.SwipeableItem;
 import com.layer.messenger.R;
-import com.layer.messenger.app.BaseActivity;
-import com.layer.messenger.layer.conversations.ConversationSettingsActivity;
+import com.layer.messenger.layer.base.LayerActivity;
 import com.layer.messenger.layer.providers.client.LayerClientProvider;
 import com.layer.messenger.layer.push.PushNotificationReceiver;
 import com.layer.messenger.util.Log;
@@ -41,10 +39,11 @@ import com.layer.sdk.exceptions.LayerConversationException;
 import com.layer.sdk.messaging.Conversation;
 import com.layer.sdk.messaging.ConversationOptions;
 import com.layer.sdk.messaging.Message;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class MessagesListActivity extends BaseActivity {
+public class MessagesListActivity extends LayerActivity {
     private UiState mState;
     private Conversation mConversation;
 
@@ -55,7 +54,7 @@ public class MessagesListActivity extends BaseActivity {
     private AtlasMessageComposer mMessageComposer;
 
     public MessagesListActivity() {
-        super(R.layout.activity_messages_list, R.menu.menu_messages_list, R.string.title_select_conversation, true);
+        super(R.layout.activity_messages_list, /*R.menu.menu_messages_list,*/ R.string.title_select_conversation, true);
     }
 
     private void setUiState(UiState state) {
@@ -102,7 +101,7 @@ public class MessagesListActivity extends BaseActivity {
             }
 
             mAddressBar = ((AtlasAddressBar) findViewById(R.id.conversation_launcher))
-                    .init(getLayerClient(), getParticipantProvider(), getPicasso())
+                    .init(getLayerClient(), getParticipantProvider(), Picasso.with(MessagesListActivity.this))
                     .setOnConversationClickListener(new AtlasAddressBar.OnConversationClickListener() {
                         @Override
                         public void onConversationClick(AtlasAddressBar addressBar, Conversation conversation) {
@@ -161,12 +160,12 @@ public class MessagesListActivity extends BaseActivity {
                     .setHistoricMessagesPerFetch(20);
 
             mMessagesList = ((AtlasMessagesRecyclerView) findViewById(R.id.messages_list))
-                    .init(getLayerClient(), getParticipantProvider(), getPicasso())
+                    .init(getLayerClient(), getParticipantProvider(), Picasso.with(MessagesListActivity.this))
                     .addCellFactories(
                             new TextCellFactory(),
-                            new ThreePartImageCellFactory(this, getLayerClient(), getPicasso()),
-                            new LocationCellFactory(this, getPicasso()),
-                            new SinglePartImageCellFactory(this, getLayerClient(), getPicasso()),
+                            new ThreePartImageCellFactory(this, getLayerClient(), Picasso.with(MessagesListActivity.this)),
+                            new LocationCellFactory(this, Picasso.with(MessagesListActivity.this)),
+                            new SinglePartImageCellFactory(this, getLayerClient(), Picasso.with(MessagesListActivity.this)),
                             new GenericCellFactory())
                     .setOnMessageSwipeListener(new SwipeableItem.OnSwipeListener<Message>() {
                         @Override
@@ -297,27 +296,6 @@ public class MessagesListActivity extends BaseActivity {
         } else {
             setUiState(UiState.ADDRESS_CONVERSATION_COMPOSER);
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_details:
-                if (mConversation == null) return true;
-                Intent intent = new Intent(this, ConversationSettingsActivity.class);
-                intent.putExtra(PushNotificationReceiver.LAYER_CONVERSATION_KEY, mConversation.getId());
-                startActivity(intent);
-                return true;
-
-            case R.id.action_sendlogs:
-                try {
-                    LayerClient.sendLogs(getLayerClient(), this);
-                } catch (Exception e) {
-                    Log.e("layer could not be initialized.");
-                }
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

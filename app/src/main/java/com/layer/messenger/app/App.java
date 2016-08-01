@@ -3,7 +3,7 @@ package com.layer.messenger.app;
 import android.app.Application;
 
 import com.layer.messenger.layer.providers.client.LayerClientProvider;
-import com.layer.messenger.layer.providers.picasso.PicassoProvider;
+import com.layer.messenger.util.picasso.PicassoProvider;
 
 /**
  * App provides static access to a LayerClient and other Atlas and Messenger context, including

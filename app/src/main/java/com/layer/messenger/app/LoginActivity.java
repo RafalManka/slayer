@@ -19,7 +19,7 @@ import com.layer.messenger.layer.providers.auth.model.Credentials;
 import com.layer.messenger.layer.providers.client.LayerClientProvider;
 import com.layer.messenger.util.Log;
 
-public class DemoLoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     EditText mName;
 
@@ -71,9 +71,9 @@ public class DemoLoginActivity extends AppCompatActivity {
                         if (Log.isLoggable(Log.VERBOSE)) {
                             Log.v("Successfully authenticated as `" + name + "` with userId `" + userId + "`");
                         }
-                        Intent intent = new Intent(DemoLoginActivity.this, ConversationsListActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, ConversationsListActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        DemoLoginActivity.this.startActivity(intent);
+                        LoginActivity.this.startActivity(intent);
                     }
 
                     @Override
@@ -85,7 +85,7 @@ public class DemoLoginActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(DemoLoginActivity.this, error, Toast.LENGTH_LONG).show();
+                                Toast.makeText(LoginActivity.this, error, Toast.LENGTH_LONG).show();
                                 mName.setEnabled(true);
                             }
                         });

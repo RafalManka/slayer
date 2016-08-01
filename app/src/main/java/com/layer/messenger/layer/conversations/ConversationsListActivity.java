@@ -4,25 +4,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.layer.atlas.AtlasConversationsRecyclerView;
 import com.layer.atlas.adapters.AtlasConversationsAdapter;
 import com.layer.atlas.util.views.SwipeableItem;
 import com.layer.messenger.R;
-import com.layer.messenger.app.AppSettingsActivity;
-import com.layer.messenger.app.BaseActivity;
-import com.layer.messenger.layer.providers.client.LayerClientProvider;
+import com.layer.messenger.layer.base.LayerActivity;
 import com.layer.messenger.layer.messages.MessagesListActivity;
+import com.layer.messenger.layer.providers.client.LayerClientProvider;
 import com.layer.messenger.layer.push.PushNotificationReceiver;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 import com.layer.sdk.messaging.Conversation;
+import com.squareup.picasso.Picasso;
 
-public class ConversationsListActivity extends BaseActivity {
+public class ConversationsListActivity extends LayerActivity {
     public ConversationsListActivity() {
-        super(R.layout.activity_conversations_list, R.menu.menu_conversations_list, R.string.title_conversations_list, false);
+        super(R.layout.activity_conversations_list, R.string.title_conversations_list, false);
     }
 
     @Override
@@ -41,7 +40,7 @@ public class ConversationsListActivity extends BaseActivity {
 
         // Atlas methods
         try {
-            conversationsList.init(getLayerClient(), getParticipantProvider(), getPicasso())
+            conversationsList.init(getLayerClient(), getParticipantProvider(), Picasso.with(ConversationsListActivity.this))
                     .setInitialHistoricMessagesToFetch(20)
                     .setOnConversationClickListener(new AtlasConversationsAdapter.OnConversationClickListener() {
                         @Override
@@ -99,22 +98,4 @@ public class ConversationsListActivity extends BaseActivity {
                 });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                startActivity(new Intent(this, AppSettingsActivity.class));
-                return true;
-
-            case R.id.action_sendlogs:
-                try {
-                    LayerClient.sendLogs(getLayerClient(), this);
-                } catch (Exception e) {
-                    Log.e("Layer could not be initialized");
-                }
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

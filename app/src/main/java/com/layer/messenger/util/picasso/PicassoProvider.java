@@ -1,4 +1,4 @@
-package com.layer.messenger.layer.providers.picasso;
+package com.layer.messenger.util.picasso;
 
 import com.layer.atlas.util.picasso.requesthandlers.MessagePartRequestHandler;
 import com.layer.messenger.app.App;
@@ -11,11 +11,10 @@ import com.squareup.picasso.Picasso;
  */
 public class PicassoProvider {
 
-    private static Picasso sPicasso;
 
-    public static Picasso getInstance() {
+    /*public static Picasso getInstance() {
         return sPicasso;
-    }
+    }*/
 
     public static void init(App app) {
         // Picasso with custom RequestHandler for loading from Layer MessageParts.
@@ -25,6 +24,9 @@ public class PicassoProvider {
         } catch (Exception e) {
             Log.e("Layer could not be initialized");
         }
-        sPicasso = builder.build();
+        Picasso sPicasso = builder.build();
+
+        Picasso.setSingletonInstance(sPicasso);
+
     }
 }
