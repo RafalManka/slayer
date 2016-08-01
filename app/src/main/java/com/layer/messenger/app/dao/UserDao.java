@@ -145,14 +145,6 @@ public class UserDao implements ParticipantProvider, ParticipantsRequestCallback
         return false;
     }
 
-    private String getProjectId() {
-        if (BuildConfig.LAYER_APP_ID.contains("/")) {
-            return Uri.parse(BuildConfig.LAYER_APP_ID).getLastPathSegment();
-        } else {
-            return BuildConfig.LAYER_APP_ID;
-        }
-    }
-
     //==============================================================================================
     // Network operations
     //==============================================================================================

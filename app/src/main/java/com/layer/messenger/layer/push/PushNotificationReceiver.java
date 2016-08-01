@@ -309,7 +309,7 @@ public class PushNotificationReceiver extends BroadcastReceiver {
                 // Construct notification
                 // TODO: use large icon based on avatars
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.notification)
+                        .setSmallIcon(R.drawable.ic_notification)
                         .setContentTitle(conversationTitle)
                         .setContentText(collapsedSummary)
                         .setAutoCancel(true)
@@ -339,7 +339,7 @@ public class PushNotificationReceiver extends BroadcastReceiver {
 
         private void notifyOnContentFailure(Context context, Uri conversationId, Uri messageId, String text) {
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                    .setSmallIcon(R.drawable.notification)
+                    .setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(context.getString(R.string.push_notification_no_content_title))
                     .setContentText(text)
                     .setAutoCancel(true)
