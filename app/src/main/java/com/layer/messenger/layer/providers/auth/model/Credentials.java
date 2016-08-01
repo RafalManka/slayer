@@ -1,4 +1,4 @@
-package com.layer.messenger.layer.providers.auth;
+package com.layer.messenger.layer.providers.auth.model;
 
 /**
  * Created by rafal on 7/31/16.

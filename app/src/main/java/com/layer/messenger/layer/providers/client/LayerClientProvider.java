@@ -12,8 +12,9 @@ import com.layer.atlas.util.Util;
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.App;
 import com.layer.messenger.app.dao.UserDao;
+import com.layer.messenger.layer.providers.auth.AuthenticationCallback;
 import com.layer.messenger.layer.providers.auth.AuthenticationProvider;
-import com.layer.messenger.layer.providers.auth.DemoAuthenticationProvider;
+import com.layer.messenger.layer.providers.auth.model.Credentials;
 import com.layer.sdk.LayerClient;
 
 import java.util.Arrays;
@@ -57,10 +58,8 @@ public class LayerClientProvider {
         if (sLayerClient == null) {
             // Custom options for constructing a LayerClient
             LayerClient.Options options = new LayerClient.Options()
-
                     /* Fetch the minimum amount per conversation when first authenticated */
                     .historicSyncPolicy(LayerClient.Options.HistoricSyncPolicy.FROM_LAST_MESSAGE)
-
                     /* Automatically download text and ThreePartImage info/preview */
                     .autoDownloadMimeTypes(Arrays.asList(
                             TextCellFactory.MIME_TYPE,
@@ -101,13 +100,13 @@ public class LayerClientProvider {
     }
 
     public static AuthenticationProvider generateAuthenticationProvider(Context context) {
-        return new DemoAuthenticationProvider(context);
+        return new AuthenticationProvider(context);
     }
 
     /**
      * Deauthenticates with Layer and clears cached AuthenticationProvider credentials.
      *
-     * @param callback Callback to receive deauthentication success and failure.
+     * @param callback AuthenticationCallback to receive deauthentication success and failure.
      */
     public static void deauthenticate(@Nullable final LayerDeauthenticationCallbacks callback) throws Exception {
         LayerClient instance = getInstance();
@@ -129,7 +128,9 @@ public class LayerClientProvider {
 
             @Override
             public void onDeauthenticationFailed(LayerClient client, String reason) {
-                callback.onDeauthenticationFailed(client, reason);
+                if (callback != null) {
+                    callback.onDeauthenticationFailed(client, reason);
+                }
             }
         });
     }
@@ -162,17 +163,17 @@ public class LayerClientProvider {
 
     /**
      * Authenticates with the AuthenticationProvider and Layer, returning asynchronous results to
-     * the provided callback.
+     * the provided authenticationCallback.
      *
      * @param credentials Credentials associated with the current AuthenticationProvider.
-     * @param callback    Callback to receive authentication results.
+     * @param authenticationCallback    AuthenticationCallback to receive authentication results.
      */
     @SuppressWarnings("unchecked")
-    public static void authenticate(Object credentials, AuthenticationProvider.Callback callback) throws Exception {
+    public static void authenticate(Credentials credentials, AuthenticationCallback authenticationCallback) throws Exception {
         LayerClient client = getInstance();
         getAuthenticationProvider()
                 .setCredentials(credentials)
-                .setCallback(callback);
+                .setCallback(authenticationCallback);
         client.authenticate();
     }
 
