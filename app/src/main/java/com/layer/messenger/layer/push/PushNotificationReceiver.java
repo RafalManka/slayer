@@ -15,8 +15,8 @@ import android.support.v4.content.ContextCompat;
 import com.layer.atlas.util.Util;
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.R;
-import com.layer.messenger.layer.providers.client.LayerClientProvider;
 import com.layer.messenger.layer.messages.MessagesListActivity;
+import com.layer.messenger.layer.providers.client.LayerClientProvider;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 import com.layer.sdk.messaging.Conversation;
@@ -137,6 +137,7 @@ public class PushNotificationReceiver extends BroadcastReceiver {
      * grouped by Conversation, where a Conversation's notifications are rolled-up into single
      * notification summaries.
      */
+    @SuppressWarnings("unused")
     public static class Notifications {
         private static final String KEY_ALL = "all";
         private static final String KEY_POSITION = "position";

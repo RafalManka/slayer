@@ -9,13 +9,16 @@ import com.layer.atlas.messagetypes.text.TextCellFactory;
 import com.layer.atlas.messagetypes.threepartimage.ThreePartImageUtils;
 import com.layer.atlas.provider.ParticipantProvider;
 import com.layer.atlas.util.Util;
+import com.layer.atlas.util.picasso.requesthandlers.MessagePartRequestHandler;
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.App;
 import com.layer.messenger.app.dao.UserDao;
 import com.layer.messenger.layer.providers.auth.AuthenticationCallback;
 import com.layer.messenger.layer.providers.auth.AuthenticationProvider;
 import com.layer.messenger.layer.providers.auth.model.Credentials;
+import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
+import com.squareup.picasso.Picasso;
 
 import java.util.Arrays;
 
@@ -24,9 +27,13 @@ import java.util.Arrays;
  */
 public class LayerClientProvider {
 
+    @Nullable
     private static LayerClient sLayerClient;
+    @Nullable
     private static AuthenticationProvider sAuthProvider;
+    @Nullable
     private static ParticipantProvider sParticipantProvider;
+    @Nullable
     private static Context sContext;
 
     /**
@@ -37,7 +44,7 @@ public class LayerClientProvider {
     public static void init(@NonNull App app) {
         sContext = app;
         // Enable verbose logging in debug builds
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) { // if environment is debug, log everything.
             com.layer.atlas.util.Log.setLoggingEnabled(true);
             com.layer.messenger.util.Log.setAlwaysLoggable(true);
             LayerClient.setLoggingEnabled(app, true);
@@ -80,18 +87,30 @@ public class LayerClientProvider {
         return sLayerClient;
     }
 
+    /**
+     * Create new instance on {@link LayerClient}
+     *
+     * @param context App context
+     * @param options Layer options
+     * @return new instance of layer client
+     */
     private static LayerClient generateLayerClient(Context context, LayerClient.Options options) {
         // If no App ID is set yet, return `null`; we'll launch the AppIdScanner to get one.
-
         options.googleCloudMessagingSenderId(BuildConfig.GCM_SENDER_ID);
         return LayerClient.newInstance(context, BuildConfig.LAYER_APP_ID, options);
     }
 
 
+    /**
+     * Return reference to global instance of {@link AuthenticationProvider}
+     * Lazy instantiate if not exist
+     *
+     * @return global instance of {@link AuthenticationProvider}
+     * @throws Exception
+     */
     public static AuthenticationProvider getAuthenticationProvider() throws Exception {
         if (sAuthProvider == null) {
             sAuthProvider = generateAuthenticationProvider(sContext);
-
             // If we have cached credentials, try authenticating with Layer
             LayerClient layerClient = getInstance();
             if (sAuthProvider.hasCredentials()) layerClient.authenticate();
@@ -99,6 +118,12 @@ public class LayerClientProvider {
         return sAuthProvider;
     }
 
+    /**
+     * convenience method for creating new instance
+     *
+     * @param context app context
+     * @return new instance
+     */
     public static AuthenticationProvider generateAuthenticationProvider(Context context) {
         return new AuthenticationProvider(context);
     }
@@ -108,6 +133,7 @@ public class LayerClientProvider {
      *
      * @param callback AuthenticationCallback to receive deauthentication success and failure.
      */
+    @SuppressWarnings("unused")
     public static void deauthenticate(@Nullable final LayerDeauthenticationCallbacks callback) throws Exception {
         LayerClient instance = getInstance();
         Util.deauthenticate(instance, new Util.DeauthenticationCallback() {
@@ -135,6 +161,13 @@ public class LayerClientProvider {
         });
     }
 
+    /**
+     * Get provider of participants that are available to start a conversation with.
+     *
+     * @return global instance of Participants provider
+     * @throws Exception if provider could not be created.
+     */
+    @NonNull
     public static ParticipantProvider getParticipantProvider() throws Exception {
         if (sParticipantProvider == null) {
             sParticipantProvider = generateParticipantProvider(sContext);
@@ -142,6 +175,13 @@ public class LayerClientProvider {
         return sParticipantProvider;
     }
 
+    /**
+     * Create instance of User Data Access Object.
+     *
+     * @param context App's context
+     * @return instance of UserDao
+     */
+    @NonNull
     public static ParticipantProvider generateParticipantProvider(Context context) {
         return new UserDao(context).setup();
     }
@@ -165,8 +205,8 @@ public class LayerClientProvider {
      * Authenticates with the AuthenticationProvider and Layer, returning asynchronous results to
      * the provided authenticationCallback.
      *
-     * @param credentials Credentials associated with the current AuthenticationProvider.
-     * @param authenticationCallback    AuthenticationCallback to receive authentication results.
+     * @param credentials            Credentials associated with the current AuthenticationProvider.
+     * @param authenticationCallback AuthenticationCallback to receive authentication results.
      */
     @SuppressWarnings("unchecked")
     public static void authenticate(Credentials credentials, AuthenticationCallback authenticationCallback) throws Exception {
@@ -177,4 +217,16 @@ public class LayerClientProvider {
         client.authenticate();
     }
 
+    /**
+     * Add request handler to Picasso during initial config in App's onCreate method.
+     *
+     * @param builder Picasso builder
+     */
+    public static void addRequestHandler(Picasso.Builder builder) {
+        try {
+            builder.addRequestHandler(new MessagePartRequestHandler(LayerClientProvider.getInstance()));
+        } catch (Exception e) {
+            Log.e("Layer could not be initialized");
+        }
+    }
 }

@@ -54,7 +54,7 @@ public class MessagesListActivity extends LayerActivity {
     private AtlasMessageComposer mMessageComposer;
 
     public MessagesListActivity() {
-        super(R.layout.activity_messages_list, /*R.menu.menu_messages_list,*/ R.string.title_select_conversation, true);
+        super(R.layout.activity_messages_list, R.string.title_select_conversation, true);
     }
 
     private void setUiState(UiState state) {
@@ -117,7 +117,10 @@ public class MessagesListActivity extends LayerActivity {
                                 return;
                             }
                             try {
-                                setConversation(getLayerClient().newConversation(new ConversationOptions().distinct(true), participantIds), false);
+                                setConversation(
+                                        getLayerClient().newConversation(new ConversationOptions().distinct(true), participantIds),
+                                        false
+                                );
                             } catch (LayerConversationException e) {
                                 setConversation(e.getConversation(), false);
                             } catch (Exception e) {

@@ -86,7 +86,4 @@ public abstract class LayerActivity extends AppCompatActivity {
         return LayerClientProvider.getParticipantProvider();
     }
 
-//    protected Picasso getPicasso() {
-//        return PicassoProvider.getInstance();
-//    }
 }

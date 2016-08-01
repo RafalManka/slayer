@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.Atlas.Light">
-        <!-- Apply default Atlas styles -->
-        <item name="AtlasConversationsRecyclerView">@style/AtlasConversationsRecyclerView</item>
-        <item name="AtlasMessagesRecyclerView">@style/AtlasMessagesRecyclerView</item>
-        <item name="AtlasMessageComposer">@style/AtlasMessageComposer</item>
-        <item name="AtlasAddressBar">@style/AtlasAddressBar</item>
-        <item name="AtlasTypingIndicator">@style/AtlasTypingIndicator</item>
+    <!-- Base Slayer app theme. -->
+    <style name="SlayerAppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!--
+        It was originally parent="Theme.Atlas.Light" in Atlas Demo app, so you can find more info
+        on how to customize it there
+        -->
+        <item name="AtlasConversationsRecyclerView">@style/SlayerAtlasConversationsRecyclerView
+        </item>
+        <item name="AtlasMessagesRecyclerView">@style/SlayerAtlasMessagesRecyclerView</item>
+        <item name="AtlasMessageComposer">@style/SlayerAtlasConversationsRecyclerView</item>
+        <item name="AtlasAddressBar">@style/SlayerAtlasAddressBar</item>
+        <item name="AtlasTypingIndicator">@style/SlayerAtlasTypingIndicator</item>
     </style>
 
 </resources>
