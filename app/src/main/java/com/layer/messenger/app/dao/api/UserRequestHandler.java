@@ -5,8 +5,10 @@ import android.os.AsyncTask;
 
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.dao.UserUtils;
+import com.layer.messenger.layer.base.client.LayerProvider;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
+import com.layer.sdk.messaging.Conversation;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import static com.layer.messenger.util.Util.streamToString;
 
@@ -32,10 +35,20 @@ public class UserRequestHandler {
         }
     }
 
+    /**
+     * Send a request to your private API and request for participants that have conversations
+     * with current user.
+     * The response should include usernames and avatars as well as id's
+     *
+     * @param callback
+     */
     public static void startRequestParticipants(final ParticipantsRequestCallback callback) {
         new AsyncTask<Void, Void, Void>() {
             protected Void doInBackground(Void... params) {
                 try {
+                    List<Conversation> conversations = LayerProvider.getInstance().getConversations();
+                    // LayerManager.getInstance().getLayerClient().getConversations();
+
                     // Post request
                     String url = "https://layer-identity-provider.herokuapp.com/apps/" + getProjectId() + "/atlas_identities";
                     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -70,7 +83,14 @@ public class UserRequestHandler {
         }.execute();
     }
 
-
+    /**
+     * Authenticate user in backend. Read more about it here: https://developer.layer.com/docs/android/guides
+     * Basically you need to send credentials (including nonce) to your backend.
+     *
+     * @param layerClient reference to the client
+     * @param credentials username and nonce in this case
+     * @param callback    for async communication
+     */
     public static void startRequestAuthenticate(LayerClient layerClient, JSONObject credentials, OnAuthenticationFailedListener callback) {
         try {
             // Post request

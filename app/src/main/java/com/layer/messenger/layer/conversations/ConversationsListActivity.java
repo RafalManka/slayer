@@ -12,7 +12,7 @@ import com.layer.atlas.util.views.SwipeableItem;
 import com.layer.messenger.R;
 import com.layer.messenger.layer.base.LayerActivity;
 import com.layer.messenger.layer.messages.MessagesListActivity;
-import com.layer.messenger.layer.providers.client.LayerClientProvider;
+import com.layer.messenger.layer.base.client.LayerProvider;
 import com.layer.messenger.layer.push.PushNotificationReceiver;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
@@ -28,7 +28,7 @@ public class ConversationsListActivity extends LayerActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            if (LayerClientProvider.routeLogin(this)) {
+            if (LayerProvider.routeLogin(this)) {
                 if (!isFinishing()) finish();
                 return;
             }

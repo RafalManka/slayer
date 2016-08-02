@@ -1,4 +1,4 @@
-package com.layer.messenger.layer.providers.auth;
+package com.layer.messenger.layer.base.auth;
 
 /**
  * AuthenticationCallback for handling authentication success and failure.

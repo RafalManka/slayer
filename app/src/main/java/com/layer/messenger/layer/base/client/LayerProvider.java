@@ -1,4 +1,4 @@
-package com.layer.messenger.layer.providers.client;
+package com.layer.messenger.layer.base.client;
 
 import android.app.Activity;
 import android.content.Context;
@@ -13,9 +13,9 @@ import com.layer.atlas.util.picasso.requesthandlers.MessagePartRequestHandler;
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.App;
 import com.layer.messenger.app.dao.UserDao;
-import com.layer.messenger.layer.providers.auth.AuthenticationCallback;
-import com.layer.messenger.layer.providers.auth.AuthenticationProvider;
-import com.layer.messenger.layer.providers.auth.model.Credentials;
+import com.layer.messenger.layer.base.auth.AuthenticationCallback;
+import com.layer.messenger.layer.base.auth.AuthenticationProvider;
+import com.layer.messenger.layer.base.auth.model.Credentials;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 import com.squareup.picasso.Picasso;
@@ -25,19 +25,25 @@ import java.util.Arrays;
 /**
  * Created by rafal on 7/28/16.
  */
-public class LayerClientProvider {
+public class LayerProvider {
 
     @Nullable
     private static LayerClient sLayerClient;
     @Nullable
     private static AuthenticationProvider sAuthProvider;
+    /**
+     * Reference to an object that will allow you to fetch participants
+     */
     @Nullable
     private static ParticipantProvider sParticipantProvider;
+    /**
+     * Application's context set in App's onCreate
+     */
     @Nullable
     private static Context sContext;
 
     /**
-     * Initialize layer framework using App context.
+     * Initialize layer framework using App context. Set logging only for Debug environment.
      *
      * @param app Application instance from Apps onCreate
      */
@@ -100,7 +106,6 @@ public class LayerClientProvider {
         return LayerClient.newInstance(context, BuildConfig.LAYER_APP_ID, options);
     }
 
-
     /**
      * Return reference to global instance of {@link AuthenticationProvider}
      * Lazy instantiate if not exist
@@ -134,7 +139,7 @@ public class LayerClientProvider {
      * @param callback AuthenticationCallback to receive deauthentication success and failure.
      */
     @SuppressWarnings("unused")
-    public static void deauthenticate(@Nullable final LayerDeauthenticationCallbacks callback) throws Exception {
+    public static void deauthenticate(@Nullable final Util.DeauthenticationCallback callback) throws Exception {
         LayerClient instance = getInstance();
         Util.deauthenticate(instance, new Util.DeauthenticationCallback() {
             @Override
@@ -146,9 +151,7 @@ public class LayerClientProvider {
                         callback.onDeauthenticationSuccess(client);
                     }
                 } catch (Exception e) {
-                    if (callback != null) {
-                        callback.onError("Deauthentication not possible. Layer could not be initialized.");
-                    }
+                    Log.e("Layer could not be initialized");
                 }
             }
 
@@ -224,7 +227,7 @@ public class LayerClientProvider {
      */
     public static void addRequestHandler(Picasso.Builder builder) {
         try {
-            builder.addRequestHandler(new MessagePartRequestHandler(LayerClientProvider.getInstance()));
+            builder.addRequestHandler(new MessagePartRequestHandler(LayerProvider.getInstance()));
         } catch (Exception e) {
             Log.e("Layer could not be initialized");
         }

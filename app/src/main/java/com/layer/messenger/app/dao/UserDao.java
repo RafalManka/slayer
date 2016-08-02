@@ -1,11 +1,10 @@
 package com.layer.messenger.app.dao;
 
 import android.content.Context;
-import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.layer.atlas.provider.Participant;
 import com.layer.atlas.provider.ParticipantProvider;
-import com.layer.messenger.BuildConfig;
 import com.layer.messenger.app.dao.api.ParticipantListener;
 import com.layer.messenger.app.dao.api.ParticipantsRequestCallback;
 import com.layer.messenger.app.dao.api.UserRequestHandler;
@@ -74,11 +73,21 @@ public class UserDao implements ParticipantProvider, ParticipantsRequestCallback
         }
     }
 
+    /**
+     * Get participant by id. If the participant is null, then return null and start fetching
+     * participants
+     *
+     * @param userId id of participant that should be returned
+     * @return participant or null
+     */
+    @Nullable
     @Override
     public Participant getParticipant(String userId) {
         synchronized (mParticipantMap) {
             User participant = mParticipantMap.get(userId);
-            if (participant != null) return participant;
+            if (participant != null) {
+                return participant;
+            }
             fetchParticipants();
             return null;
         }
@@ -194,6 +203,12 @@ public class UserDao implements ParticipantProvider, ParticipantsRequestCallback
         return this;
     }
 
+    /**
+     * New list of participants was downloaded from the API. New participants that previously were
+     * not present in the participants list are passed as a param in this method.
+     *
+     * @param updatedParticipantIds Id's of new participants that have conversation with current user
+     */
     private void alertParticipantsUpdated(Collection<String> updatedParticipantIds) {
         for (ParticipantListener listener : mParticipantListeners) {
             listener.onParticipantsUpdated(this, updatedParticipantIds);

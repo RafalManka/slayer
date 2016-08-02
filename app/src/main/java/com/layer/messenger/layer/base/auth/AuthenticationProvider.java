@@ -1,15 +1,15 @@
-package com.layer.messenger.layer.providers.auth;
+package com.layer.messenger.layer.base.auth;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-import com.layer.messenger.app.LoginActivity;
 import com.layer.messenger.app.LoadingActivity;
+import com.layer.messenger.app.LoginActivity;
 import com.layer.messenger.app.dao.api.OnAuthenticationFailedListener;
 import com.layer.messenger.app.dao.api.UserRequestHandler;
-import com.layer.messenger.layer.providers.auth.model.Credentials;
+import com.layer.messenger.layer.base.auth.model.Credentials;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 import com.layer.sdk.exceptions.LayerException;
@@ -56,6 +56,11 @@ public class AuthenticationProvider implements LayerAuthenticationListener.Backg
         if (Log.isLoggable(Log.VERBOSE)) Log.v("Deauthenticated with Layer");
     }
 
+    /**
+     * You should never cache the nonce or Identity Token. Both are designed to be used once, and once only.
+     * If a user has been authenticated and you request a nonce, the nonce will come back null.
+     * Layer will cache the user so will only need to re-authenticate if the user has been deauthenticated.
+     */
     public void onAuthenticationChallenge(LayerClient layerClient, String nonce) {
         if (Log.isLoggable(Log.VERBOSE)) Log.v("Received challenge: " + nonce);
         respondToChallenge(layerClient, nonce);
@@ -105,6 +110,12 @@ public class AuthenticationProvider implements LayerAuthenticationListener.Backg
         }
     }
 
+    /**
+     * Nonce have just been received from Layer. Now its the time to register our user in our APp
+     *
+     * @param layerClient {@link LayerClient}
+     * @param nonce       to be used only once and should never be stored inside app.
+     */
     private void respondToChallenge(LayerClient layerClient, String nonce) {
         Credentials credentials = new Credentials(mPreferences.getString("name", null));
         if (credentials.getUserName() == null) {

@@ -16,7 +16,7 @@ import com.layer.atlas.util.Util;
 import com.layer.messenger.BuildConfig;
 import com.layer.messenger.R;
 import com.layer.messenger.layer.messages.MessagesListActivity;
-import com.layer.messenger.layer.providers.client.LayerClientProvider;
+import com.layer.messenger.layer.base.client.LayerProvider;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 import com.layer.sdk.messaging.Conversation;
@@ -89,7 +89,7 @@ public class PushNotificationReceiver extends BroadcastReceiver {
 
             // Try to have content ready for viewing before posting a Notification
             try {
-                LayerClient layerClient = LayerClientProvider.getInstance();
+                LayerClient layerClient = LayerProvider.getInstance();
                 layerClient.waitForContent(messageId, new LayerClient.ContentAvailableCallback() {
                     @Override
                     public void onContentAvailable(LayerClient client, @NonNull Queryable object) {
@@ -288,7 +288,7 @@ public class PushNotificationReceiver extends BroadcastReceiver {
 
             // Construct notification
             try {
-                String conversationTitle = Util.getConversationTitle(LayerClientProvider.getInstance(), LayerClientProvider.getParticipantProvider(), conversation);
+                String conversationTitle = Util.getConversationTitle(LayerProvider.getInstance(), LayerProvider.getParticipantProvider(), conversation);
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle().setBigContentTitle(conversationTitle);
                 int i;
                 if (positions.size() <= MAX_MESSAGES) {
@@ -368,7 +368,7 @@ public class PushNotificationReceiver extends BroadcastReceiver {
          * @return the current maximum Message position or Long.MIN_VALUE.
          */
         private long getMaxPosition(Uri conversationId) throws Exception {
-            LayerClient layerClient = LayerClientProvider.getInstance();
+            LayerClient layerClient = LayerProvider.getInstance();
 
             Query<Message> query = Query.builder(Message.class)
                     .predicate(new Predicate(Message.Property.CONVERSATION, Predicate.Operator.EQUAL_TO, conversationId))

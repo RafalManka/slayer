@@ -6,10 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.layer.atlas.provider.ParticipantProvider;
-import com.layer.messenger.layer.providers.client.LayerClientProvider;
+import com.layer.messenger.layer.base.client.LayerProvider;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
 
+/**
+ * for keeping activities DRY.
+ */
 public abstract class LayerActivity extends AppCompatActivity {
     private final int mLayoutResId;
     private final int mMenuTitleResId;
@@ -52,11 +55,14 @@ public abstract class LayerActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Attempt ro connect to layer and authenticate. every time the Activity is started.
+     */
     @Override
     protected void onResume() {
         super.onResume();
         try {
-            LayerClient client = LayerClientProvider.getInstance();
+            LayerClient client = LayerProvider.getInstance();
             if (client.isAuthenticated()) {
                 client.connect();
             } else {
@@ -79,11 +85,11 @@ public abstract class LayerActivity extends AppCompatActivity {
     }
 
     protected LayerClient getLayerClient() throws Exception {
-        return LayerClientProvider.getInstance();
+        return LayerProvider.getInstance();
     }
 
     protected ParticipantProvider getParticipantProvider() throws Exception {
-        return LayerClientProvider.getParticipantProvider();
+        return LayerProvider.getParticipantProvider();
     }
 
 }

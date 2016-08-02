@@ -13,10 +13,10 @@ import android.widget.Toast;
 
 import com.layer.messenger.R;
 import com.layer.messenger.layer.conversations.ConversationsListActivity;
-import com.layer.messenger.layer.providers.auth.AuthenticationCallback;
-import com.layer.messenger.layer.providers.auth.AuthenticationProvider;
-import com.layer.messenger.layer.providers.auth.model.Credentials;
-import com.layer.messenger.layer.providers.client.LayerClientProvider;
+import com.layer.messenger.layer.base.auth.AuthenticationCallback;
+import com.layer.messenger.layer.base.auth.AuthenticationProvider;
+import com.layer.messenger.layer.base.auth.model.Credentials;
+import com.layer.messenger.layer.base.client.LayerProvider;
 import com.layer.messenger.util.Log;
 
 public class LoginActivity extends AppCompatActivity {
@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getResources().getString(R.string.login_dialog_message));
         progressDialog.show();
-        LayerClientProvider.authenticate(
+        LayerProvider.authenticate(
                 new Credentials(name),
                 new AuthenticationCallback() {
                     @Override
