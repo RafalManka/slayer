@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 import com.layer.messenger.app.LoadingActivity;
 import com.layer.messenger.app.LoginActivity;
 import com.layer.messenger.app.dao.api.OnAuthenticationFailedListener;
-import com.layer.messenger.app.dao.api.UserRequestHandler;
+import com.layer.messenger.app.dao.api.APIRequestHandler;
 import com.layer.messenger.layer.base.auth.model.Credentials;
 import com.layer.messenger.util.Log;
 import com.layer.sdk.LayerClient;
@@ -130,7 +130,7 @@ public class AuthenticationProvider implements LayerAuthenticationListener.Backg
                     .put("nonce", nonce)
                     .put("name", credentials.getUserName());
 
-            UserRequestHandler.startRequestAuthenticate(layerClient, params, AuthenticationProvider.this);
+            APIRequestHandler.startRequestAuthenticate(layerClient, params, AuthenticationProvider.this);
         } catch (JSONException e) {
             Log.e("Something went wrong While trying to authenticate in Layer.", e);
         }

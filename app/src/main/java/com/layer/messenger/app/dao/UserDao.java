@@ -7,7 +7,7 @@ import com.layer.atlas.provider.Participant;
 import com.layer.atlas.provider.ParticipantProvider;
 import com.layer.messenger.app.dao.api.ParticipantListener;
 import com.layer.messenger.app.dao.api.ParticipantsRequestCallback;
-import com.layer.messenger.app.dao.api.UserRequestHandler;
+import com.layer.messenger.app.dao.api.APIRequestHandler;
 import com.layer.messenger.app.model.User;
 import com.layer.messenger.util.Log;
 
@@ -161,7 +161,7 @@ public class UserDao implements ParticipantProvider, ParticipantsRequestCallback
         if (!mFetching.compareAndSet(false, true)) {
             return this;
         }
-        UserRequestHandler.startRequestParticipants(this);
+        APIRequestHandler.startRequestParticipants(this);
         return this;
     }
 

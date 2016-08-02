@@ -25,7 +25,7 @@ import static com.layer.messenger.util.Util.streamToString;
 /**
  * Created by rafal on 7/31/16.
  */
-public class UserRequestHandler {
+public class APIRequestHandler {
 
     private static String getProjectId() {
         if (BuildConfig.LAYER_APP_ID.contains("/")) {
@@ -46,9 +46,6 @@ public class UserRequestHandler {
         new AsyncTask<Void, Void, Void>() {
             protected Void doInBackground(Void... params) {
                 try {
-                    List<Conversation> conversations = LayerProvider.getInstance().getConversations();
-                    // LayerManager.getInstance().getLayerClient().getConversations();
-
                     // Post request
                     String url = "https://layer-identity-provider.herokuapp.com/apps/" + getProjectId() + "/atlas_identities";
                     HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
